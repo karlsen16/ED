@@ -1,2 +1,3 @@
-# zeroRaizes
-Programa simples que usa métodos numéricos para encontrar raízes de funções
+# ED
+
+Repositório para exercícios e trabalhos de Estrutura de Dados I e II
