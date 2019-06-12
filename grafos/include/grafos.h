@@ -6,6 +6,7 @@
 typedef struct noA {
    int id;          /*Identificador armazenado no nó. */
    struct noA *next; /* Próximo nó na lista encadeada. */
+   int peso;        /*Peso armazenado na aresta. */
 } NoA;
 
 /*Estrutura de Grafo com lista de adjacências: */
@@ -27,15 +28,20 @@ typedef struct grafoM {
    NoM **Mat; /* Matrix de adjacências. */
 } GrafoM;
 
-GrafoA* criar_grafo_adj (int tamanho);
-void insere_verticeA (GrafoA *G, int id);
-void imprime_grafoA (GrafoA *G);
-
-
-GrafoM* criar_grafo_mat (int tamanho);
-void liberar_grafo_adj (GrafoA *G);
-void liberar_grafo_mat (GrafoM *G);
-
+GrafoA* criarGrafoAdj (int tamanho);
+void adicionaArestaGrafoA (int u, int v, GrafoA *G, int peso);
+void adicionaArestaLista (int u, int v, GrafoA *G, int peso);
+GrafoM* criarGrafoMatriz (int tamanho);
+void inicializaGrafoMat (GrafoM *G);
+void adicionaArestaGrafoM (int u, int v, GrafoM *G, int peso);
+void adicionaArestaMatriz (int u, int v, GrafoM *G, int peso);
+void imprimeGrafoMat (GrafoM *G);
+void imprimeGrafoAdj (GrafoA *G);
+void liberarGrafoAdj (GrafoA *G);
+void liberarGrafoMatriz (GrafoM *G);
+void exercicio1 ();
+void exercicio2 ();
+void exercicio3 ();
 
 
 #endif /*___GRAFOS_H__ */

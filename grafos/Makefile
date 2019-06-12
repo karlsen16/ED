@@ -1,12 +1,12 @@
 
-APPS 		= ./apps
-BIN 		= ./bin
+APPS 			= ./apps
+BIN 			= ./bin
 INCLUDE 	= ./include
-LIB 		= ./lib
-OBJ 		= ./obj
-SRC 		= ./src
+LIB 			= ./lib
+OBJ 			= ./obj
+SRC 			= ./src
 FLAGS 		= -Wall -std=gnu99
-LIBS		= -lgrf -L $(LIB)
+LIBS			= -lgrf -L $(LIB)
 
 all: libgrf app
 
