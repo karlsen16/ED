@@ -1,5 +1,5 @@
 *.[oa]
-#*/bin/
-#*/obj/
-#*/lib/
+bin/
+obj/
+lib/
 
