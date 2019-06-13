@@ -31,17 +31,20 @@ typedef struct grafoM {
 GrafoA* criarGrafoAdj (int tamanho);
 void adicionaArestaGrafoA (int u, int v, GrafoA *G, int peso);
 void adicionaArestaLista (int u, int v, GrafoA *G, int peso);
+void listaNumeroArestasIncidentesAdj (int u, GrafoA *G);
+void listaNumeroArestasSaemAdj (int u, GrafoA *G);
+void listaVerticesAdjacentesAdj (int u, GrafoA *G);
 GrafoM* criarGrafoMatriz (int tamanho);
 void inicializaGrafoMat (GrafoM *G);
 void adicionaArestaGrafoM (int u, int v, GrafoM *G, int peso);
 void adicionaArestaMatriz (int u, int v, GrafoM *G, int peso);
+void listaNumeroArestasIncidentesMatriz (int u, GrafoM *G);
+void listaNumeroArestasSaemMatriz (int u, GrafoM *G);
+void listaVerticesAdjacentesMatriz (int u, GrafoM *G);
 void imprimeGrafoMat (GrafoM *G);
 void imprimeGrafoAdj (GrafoA *G);
+void imprimeGrafoAdjPonderado (GrafoA *G);
 void liberarGrafoAdj (GrafoA *G);
 void liberarGrafoMatriz (GrafoM *G);
-void exercicio1 ();
-void exercicio2 ();
-void exercicio3 ();
-
 
 #endif /*___GRAFOS_H__ */

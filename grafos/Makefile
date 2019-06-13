@@ -11,7 +11,8 @@ LIBS			= -lgrf -L $(LIB)
 all: libgrf app
 
 libgrf: \
-	$(OBJ)/grafos.o
+	$(OBJ)/grafos.o \
+	$(OBJ)/exercicios.o
 	ar -rcs $(LIB)/libgrf.a $(OBJ)/*.o
 
 app: $(BIN)/main
