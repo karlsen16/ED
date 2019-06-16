@@ -1,6 +1,7 @@
 #include "stack.h"
 
 int main () {
+
   int i = 0;
   char *expr = "( 9 + ( ( 0 + 1 ) * ( 2 * 3 ) ) )";
   Stack *S = createStack();

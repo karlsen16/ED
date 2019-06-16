@@ -21,4 +21,10 @@ void exercicioABB7 ();
 
 void exercicioExtra ();
 
+Arvore* inicialExerciciosAVL ();
+void exercicioAVL1 (Arvore *A);
+void exercicioAVL2 (Arvore *A);
+void exercicioAVL3 ();
+void exercicioAVL4 ();
+
 #endif /*___EXERCICIOS_H_*/

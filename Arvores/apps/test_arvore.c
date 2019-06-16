@@ -21,10 +21,18 @@ int main () {
   // exercicioABB6(B);
   // exercicioABB7();
 
-  exercicioExtra();
+  // exercicioExtra();
+
+  Arvore *C = inicialExerciciosAVL();
+
+  // exercicioAVL1(C);
+  // exercicioAVL2(C);
+  // exercicioAVL3();
+  // exercicioAVL4();
 
   destroiArvore(A);
   destroiArvore(B);
+  destroiArvore(C);
 
   return 0;
 }

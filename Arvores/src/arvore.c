@@ -1,6 +1,8 @@
 #include "arvore.h"
+#include <string.h>
 #define CHAR 0
 #define INT 1
+#define STRING 2
 #define MAX(a,b) (a>b) ? (a) : (b)
 #define MIN(a,b) (a<b) ? (a) : (b)
 
@@ -14,6 +16,19 @@ void destroiArvore (Arvore *A) {
     destroiArvore(A->dir);
     free(A);
   }
+}
+
+int altura (Arvore *A) {
+  if(vazia(A))
+    return -1;
+  else if(!folha(A))
+    return 1+(MAX(altura(A->esq), altura(A->dir)));
+  else
+    return 0;
+}
+
+int balanceamento (Arvore *A) {
+  return (altura(A->dir)-altura(A->esq));
 }
 
 Arvore* constroiArvore (char elem, Arvore *esq, Arvore *dir) {
@@ -34,6 +49,50 @@ Arvore* constroiFolha (char elem) {
   return A;
 }
 
+Arvore* rotacaoSimplesEsq (Arvore *A) {
+  Arvore *T = A->dir;
+  A->dir = T->esq;
+  T->esq = A;
+  return T;
+}
+
+Arvore* rotacaoSimplesDir (Arvore *A) {
+  Arvore *T = A->esq;
+  A->esq = T->dir;
+  T->dir = A;
+  return T;
+}
+
+Arvore* rotacaoDuplaEsq (Arvore *A) {
+  A->dir = rotacaoSimplesDir(A->dir);
+  return rotacaoSimplesEsq(A);
+}
+
+Arvore* rotacaoDuplaDir (Arvore *A) {
+  A->esq = rotacaoSimplesEsq(A->esq);
+  return rotacaoSimplesDir(A);
+}
+
+Arvore* atualizarBalanceamentoEsq (Arvore *A) {
+  if(balanceamento(A) == -2) {
+    if(balanceamento(A->esq) <= 0)
+      A = rotacaoSimplesDir(A);
+    else
+      A = rotacaoDuplaDir(A);
+  }
+  return A;
+}
+
+Arvore* atualizarBalanceamentoDir (Arvore *A) {
+  if(balanceamento(A) == 2) {
+    if(balanceamento(A->dir) >= 0)
+      A = rotacaoSimplesEsq(A);
+    else
+      A = rotacaoDuplaEsq(A);
+  }
+  return A;
+}
+
 Arvore* inserir (Arvore *A, int valor) {
   if(vazia(A))
     A = constroiFolha(valor);
@@ -41,6 +100,20 @@ Arvore* inserir (Arvore *A, int valor) {
     A->esq = inserir(A->esq, valor);
   else
     A->dir = inserir(A->dir, valor);
+  return A;
+}
+
+Arvore* inserirAVL (Arvore *A, int valor) {
+  if(vazia(A))
+    A = constroiFolha(valor);
+  else if(valor < A->info) {
+    A->esq = inserirAVL(A->esq, valor);
+    A = atualizarBalanceamentoEsq(A);
+  }
+  else {
+    A->dir = inserirAVL(A->dir, valor);
+    A = atualizarBalanceamentoDir(A);
+  }
   return A;
 }
 
@@ -57,14 +130,14 @@ Arvore* remover (Arvore *A, int valor) {
         free(A);
         A = NULL;
       }
-      else if(vazia(A->dir)) {
-        Arvore *tmp = A;
-        A = A->esq;
-        free(tmp);
-      }
       else if(vazia(A->esq)) {
         Arvore *tmp = A;
         A = A->dir;
+        free(tmp);
+      }
+      else if(vazia(A->dir)) {
+        Arvore *tmp = A;
+        A = A->esq;
         free(tmp);
       }
       else {
@@ -74,6 +147,47 @@ Arvore* remover (Arvore *A, int valor) {
         A->info = tmp->info;
         tmp->info = valor;
         A->esq = remover(A->esq, valor);
+      }
+    }
+  }
+  return A;
+}
+
+Arvore* removerAVL (Arvore *A, int valor) {
+  if (vazia(A))
+    return NULL;
+  else {
+    if (valor < A->info) {
+      A->esq = removerAVL (A->esq, valor);
+      A = atualizarBalanceamentoDir (A);
+    }
+    else if (valor > A->info) {
+      A->dir = removerAVL (A->dir, valor);
+      A = atualizarBalanceamentoEsq (A);
+    }
+    else {
+      if (folha(A)) {
+        free (A);
+        A = NULL;
+      }
+      else if (vazia(A->esq)) {
+        Arvore *tmp = A;
+        A = A->dir;
+        free (tmp);
+      }
+      else if (vazia(A->dir)) {
+        Arvore *tmp = A;
+        A = A->esq;
+        free (tmp);
+      }
+      else {
+        Arvore *tmp = A->esq;
+        while (!vazia(tmp->dir))
+          tmp = tmp->dir;
+        A->info = tmp->info;
+        tmp->info = valor;
+        A->esq = removerAVL (A->esq, valor);
+        A = atualizarBalanceamentoDir (A);
       }
     }
   }
@@ -137,12 +251,34 @@ int ancestral (Arvore *A, int esq, int dir) {
     return ancestral(A->dir, esq, dir);
 }
 
+void imprime (Arvore *A, int tipo) {
+  if(tipo == CHAR)
+    printf("%2c", A->info);
+  else
+    printf("%2d", A->info);
+}
+
+void imprimeChar (int n, char c) {
+  int i;
+  for(i = 0; i < n; i++)
+    printf("%c", c);
+}
+
+void imprimeFilhos (Arvore *A, int espacos, int tipo) {
+  if(!vazia(A->esq))
+    imprime(A->esq, tipo);
+  else
+    espacos += 2;
+  imprimeChar(espacos, ' ');
+  if(!vazia(A->dir))
+    imprime(A->dir, tipo);
+  else
+    imprimeChar(2, ' ');
+}
+
 void imprimePreOrdem (Arvore *A, int tipo) {
   if(!vazia(A)) {
-    if(tipo == CHAR)
-      printf("%c  ", A->info);
-    else
-      printf("%d  ", A->info);
+    imprime(A, tipo);
     imprimePreOrdem(A->esq, tipo);
     imprimePreOrdem(A->dir, tipo);
   }
@@ -151,10 +287,7 @@ void imprimePreOrdem (Arvore *A, int tipo) {
 void imprimeInOrdem (Arvore *A, int tipo) {
   if(!vazia(A)) {
     imprimeInOrdem(A->esq, tipo);
-    if(tipo == CHAR)
-      printf("%c  ", A->info);
-    else
-      printf("%d  ", A->info);
+    imprime(A, tipo);
     imprimeInOrdem(A->dir, tipo);
   }
 }
@@ -163,57 +296,31 @@ void imprimePosOrdem (Arvore *A, int tipo) {
   if(!vazia(A)) {
     imprimePosOrdem(A->esq, tipo);
     imprimePosOrdem(A->dir, tipo);
-    if(tipo == CHAR)
-      printf("%c  ", A->info);
-    else
-      printf("%d  ", A->info);
-  }
-}
-
-void imprimePreOrdemR (Arvore *A, int tipo) {
-  if(!vazia(A)) {
-    if(tipo == CHAR)
-      printf("%c  ", A->info);
-    else
-      printf("%d  ", A->info);
-    imprimePreOrdemR(A->dir, tipo);
-    imprimePreOrdemR(A->esq, tipo);
-  }
-}
-
-void imprimeInOrdemR (Arvore *A, int tipo) {
-  if(!vazia(A)) {
-    imprimeInOrdemR(A->dir, tipo);
-    if(tipo == CHAR)
-      printf("%c  ", A->info);
-    else
-      printf("%d  ", A->info);
-    imprimeInOrdemR(A->esq, tipo);
-  }
-}
-
-void imprimePosOrdemR (Arvore *A, int tipo) {
-  if(!vazia(A)) {
-    imprimePosOrdemR(A->dir, tipo);
-    imprimePosOrdemR(A->esq, tipo);
-    if(tipo == CHAR)
-      printf("%c  ", A->info);
-    else
-      printf("%d  ", A->info);
+    imprime(A, tipo);
   }
 }
 
 void imprimeMarcadores (Arvore *A, int tipo) {
   printf("<");
   if(!vazia(A)) {
-    if(tipo == CHAR)
-      printf("%c", A->info);
-    else
-      printf("%d", A->info);
+    imprime(A, tipo);
     imprimeMarcadores(A->esq, tipo);
     imprimeMarcadores(A->dir, tipo);
   }
   printf(">");
+}
+
+void imprimeEscada (Arvore *A, int nivel, int tipo) {
+  if (!vazia(A)) {
+    int i;
+    for (i = 0; i < nivel; i++)
+      imprimeChar(6, ' ');
+    printf("Chave:");
+    imprime(A, tipo);
+    printf(" (altura: %d, fb: %+d) no nível: %d\n", altura(A), balanceamento(A), nivel);
+    imprimeEscada(A->esq, nivel+1, tipo);
+    imprimeEscada(A->dir, nivel+1, tipo);
+  }
 }
 
 int pertenceArvore (Arvore *A, char c) {
@@ -252,13 +359,6 @@ int contaNosFolha (Arvore *A) {
   return 0;
 }
 
-int altura (Arvore *A) {
-  if(!vazia(A))
-    if(!folha(A))
-      return 1+(MAX(altura(A->esq), altura(A->dir)));
-  return 0;
-}
-
 void espelhoSimilar (Arvore *A) {
   if(!vazia(A) && !folha(A)) {
     if(vazia(A->esq)) {
@@ -288,46 +388,142 @@ int retornaTamanhoVetor (int altura) {
   return tamanhoVetor;
 }
 
-void porNiveis (Arvore *A, int altura) {
-  int i, tamanhoVetor;
-  tamanhoVetor = retornaTamanhoVetor(altura);
-  Arvore **V = (Arvore**)malloc(tamanhoVetor*sizeof(Arvore*));
-  V[0] = A;
-  for(i = 1; i < tamanhoVetor; i++)
-    V[i] = NULL;
-  imprimePorNiveis(V, tamanhoVetor, 2);
+void porNiveis (Arvore *A, int altura, int tipo) {
+  if(altura == 0) {
+    imprime(A, tipo);
+    printf("\n\n");
+  }
+  else {
+    int i, tamanhoVetor, espacador;
+    tamanhoVetor = retornaTamanhoVetor(altura);
+    espacador = tamanhoVetor*2;
+    Arvore **V = (Arvore**)malloc(tamanhoVetor*sizeof(Arvore*));
+    V[0] = A;
+    imprimeChar(espacador, ' ');
+    imprime(V[0], tipo);
+    printf("\n");
+    for(i = 1; i < tamanhoVetor; i++)
+      V[i] = NULL;
+    imprimePorNiveis(V, tamanhoVetor, 2, espacador, tipo);
+  }
 }
 
-void imprimeEspacos (int n) {
-  int i;
-  for(i = 0; i < n; i++)
-    printf(" ");
-}
-
-void imprimePorNiveis (Arvore **V, int tamanhoVetor, int iterador) {
-  int i, valor = tamanhoVetor/iterador;
-  for(i = 0; i < tamanhoVetor; i += 2*valor)
+void imprimePorNiveis (Arvore **V, int tamanhoVetor, int iterador, int espacador, int tipo) {
+  int i, valor = tamanhoVetor/iterador, espacoAuxiliar;
+  espacador /= 2;
+  espacoAuxiliar = 2*espacador-2;
+  for(i = 0; i < tamanhoVetor; i += 2*valor) {
+    if(i == 0)
+      imprimeChar(espacador, ' ');
     if(!vazia(V[i])) {
-      if(i == 0)
-        imprimeEspacos(tamanhoVetor*valor);
-      else
-        imprimeEspacos(tamanhoVetor*valor+i);
-      printf("%2d", V[i]->info);
+      imprimeFilhos(V[i], espacoAuxiliar, tipo);
+      imprimeChar(espacoAuxiliar, ' ');
       V[i+valor] = V[i]->dir;
       V[i] = V[i]->esq;
     }
+    else
+      imprimeChar(2*espacoAuxiliar+4, ' ');
+  }
   printf("\n");
   iterador *= 2;
   if(iterador <= tamanhoVetor)
-    imprimePorNiveis(V, tamanhoVetor, iterador);
+    imprimePorNiveis(V, tamanhoVetor, iterador, espacador, tipo);
   else {
-    for(i = 0; i < tamanhoVetor; i ++)
-      if(!vazia(V[i])) {
-        imprimeEspacos(2);
-        printf("%2d", V[i]->info);
-      }
-      else
-        imprimeEspacos(4);
+    printf("\n\n");
   }
-  printf("\n\n");
+}
+
+ArvorePalavra* inserirPalavra (ArvorePalavra *A, char *S) {
+  if(A == NULL) {
+    A = (ArvorePalavra*)malloc(sizeof(ArvorePalavra));
+    char *tmp = (char*)malloc(sizeof(char)*strlen(S)+1);
+    strcpy(tmp, S);
+    A->S = tmp;
+    A->esq = A->dir = NULL;
+  }
+  else if(strcmp(S, A->S) < 0) {
+    A->esq = inserirPalavra(A->esq, S);
+    A = atualizarBalanceamentoEsqP(A);
+  }
+  else {
+    A->dir = inserirPalavra(A->dir, S);
+    A = atualizarBalanceamentoDirP(A);
+  }
+  return A;
+}
+
+int alturaPalavra (ArvorePalavra *A) {
+  if(A == NULL)
+    return -1;
+  else if((A->esq != NULL) || (A->dir != NULL))
+    return 1+(MAX(alturaPalavra(A->esq), alturaPalavra(A->dir)));
+  else
+    return 0;
+}
+
+int balanceamentoPalavra (ArvorePalavra *A) {
+  return (alturaPalavra(A->dir)-alturaPalavra(A->esq));
+}
+
+void imprimeEscadaPalavras (ArvorePalavra *A, int nivel) {
+  if (A != NULL) {
+    int i;
+    for (i = 0; i < nivel; i++)
+      imprimeChar(6, ' ');
+    printf("Chave: %s (altura: %d, fb: %+d) no nível: %d\n", A->S, alturaPalavra(A), balanceamentoPalavra(A), nivel);
+    imprimeEscadaPalavras(A->esq, nivel+1);
+    imprimeEscadaPalavras(A->dir, nivel+1);
+  }
+}
+
+void destroiArvorePalavra (ArvorePalavra *A) {
+  if(A != NULL) {
+    destroiArvorePalavra(A->esq);
+    destroiArvorePalavra(A->dir);
+    free(A);
+  }
+}
+
+ArvorePalavra* rotacaoSimplesEsqP (ArvorePalavra *A) {
+  ArvorePalavra *T = A->dir;
+  A->dir = T->esq;
+  T->esq = A;
+  return T;
+}
+
+ArvorePalavra* rotacaoSimplesDirP (ArvorePalavra *A) {
+  ArvorePalavra *T = A->esq;
+  A->esq = T->dir;
+  T->dir = A;
+  return T;
+}
+
+ArvorePalavra* rotacaoDuplaEsqP (ArvorePalavra *A) {
+  A->dir = rotacaoSimplesDirP(A->dir);
+  return rotacaoSimplesEsqP(A);
+}
+
+ArvorePalavra* rotacaoDuplaDirP (ArvorePalavra *A) {
+  A->esq = rotacaoSimplesEsqP(A->esq);
+  return rotacaoSimplesDirP(A);
+}
+
+ArvorePalavra* atualizarBalanceamentoEsqP (ArvorePalavra *A) {
+  if(balanceamentoPalavra(A) == -2) {
+    if(balanceamentoPalavra(A->esq) <= 0)
+      A = rotacaoSimplesDirP(A);
+    else
+      A = rotacaoDuplaDirP(A);
+  }
+  return A;
+}
+
+ArvorePalavra* atualizarBalanceamentoDirP (ArvorePalavra *A) {
+  if(balanceamentoPalavra(A) == 2) {
+    if(balanceamentoPalavra(A->dir) >= 0)
+      A = rotacaoSimplesEsqP(A);
+    else
+      A = rotacaoDuplaEsqP(A);
+  }
+  return A;
 }
