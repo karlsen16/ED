@@ -1,11 +1,11 @@
 #include "arvoreb.h"
-/*
+
 #define TIPO char
 #define T 2
 #define NOT_FOUND -1
 #define TRUE 1
 #define FALSE 0
-*/
+
 ArvoreB* constroiArvoreBVazia () {
   return NULL;
 }
@@ -15,7 +15,7 @@ int vazia (ArvoreB *A) {
 }
 
 int cheia (ArvoreB *A) {
-  return(A->n == 2*T+1);
+  return(A->n == 2*T-1);
 }
 
 void destroiArvoreB (ArvoreB *A) {
@@ -52,14 +52,30 @@ int buscar (ArvoreB *A, TIPO chave) {
     i++;
   if(chave == A->chave[i])
     return FOUND;
-  else if (A->folha)
+  else if(A->folha)
     return NOTFOUND;
-  else
+  else if(chave < A->chave[i])
     return buscar(A->filhos[i], chave);
+  else
+    return buscar(A->filhos[i+1], chave);
 }
 
 ArvoreB *inserir (ArvoreB *A, TIPO chave) {
-   /*Completar!!!!!!!!!!!!!!*/
+  if(vazia(A)) {
+    A = constroiFolha();
+    A->chaves[0] = chave;
+  }
+  else if(!A->folha) {
+    A->filhos[retornaIndice(A, chave)] = inserir(A->filhos[retornaIndice(A, chave)], chave);
+  }
+  else if(!cheia(A)) {
+    jogaPraDireita(A, chave, retornaIndice(A, chave));
+  }
+  else {
+      /*ÚLTIMO CASO FALTANDO*/
+  }
+  A->n++;
+  return A;
 }
 
 void jogaPraDireita (ArvoreB *A, TIPO chave, int indice) {
@@ -79,18 +95,37 @@ void jogaPraDireita (ArvoreB *A, TIPO chave, int indice) {
 void moveNoMaiores (ArvoreB *O, ArvoreB* D, TIPO chave) {
   int i, cont = 0;
   for(i = 0; i < O->n; i++) {
-    if(O->chaves[i] > chave)
+    if(O->chaves[i] > chave) {
       cont++;
       D = inserir(D, O->chaves[i]);
       if(!O->folha) {
         D->filhos[cont] = O->filhos[i+1]
-        D->filhos[cont-1] = constroiFolha();
-        moveNoMaiores(O->filhos[i], D->filhos[cont-1], chave);
+        if(cont == 1) {
+          D->filhos[cont-1] = constroiFolha();
+          moveNoMaiores(O->filhos[i], D->filhos[cont-1], chave);
+        }
       }
       O = remover(O, O->chaves[i]);
+    }
   }
 }
 
+int retornaIndice (ArvoreB *A, TIPO chave) {
+  if(vazia(A))
+    return 0;
+  else {
+    int i = 0;
+    while(i < A->n) {
+      if(A->chaves[i] > chave)
+        return i;
+      i++;
+    }
+    return i;
+  }
+}
+
+
+/*
 void divideDistribui (ArvoreB *P, ArvoreB *F, TIPO chave) {
   int i, mediana = F->n/2;
   ArvoreB *novo = constroiFolha();
@@ -98,42 +133,8 @@ void divideDistribui (ArvoreB *P, ArvoreB *F, TIPO chave) {
   for(i = )
 
 
-}
+}*/
 
 ArvoreB* remover (ArvoreB *A, TIPO chave) {
    /*Dois casos!!!!!!!!!!!!!!*/
 }
-
-
-/*
-Local* iniciaBusca (ArvoreB *A, TIPO chave) {
-  Local *L = (Local*)malloc(sizeof(Local));
-  L->nivel = L->no = L->found = 0;
-  L->chave = chave;
-  L = buscar(A, L);
-  return L;
-}
-
-void destroiLocal (Local *L) {
-  if(L != NULL)
-    free(L);
-}
-
-Local* buscar (ArvoreB *A, Local *L) {
-  int i = 0;
-  while((i < (A->n-1)) && (L->chave > A->chaves[i]))
-    i++;
-  if(L->chave == A->chaves[i]) {
-    L->indice = i;
-    L->found = TRUE;
-  }
-  else if(L->chave < A->chaves[i]) {
-    L->nivel++;
-    L->no = i;
-    L = buscar(A[i], L);
-  }
-  else if(A->folha == FALSE)
-      return buscar(A->filhos[i], chave);
-  return L;
-}
-*/

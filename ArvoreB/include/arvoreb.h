@@ -27,24 +27,8 @@ int buscar (ArvoreB *A, TIPO chave);
 ArvoreB *inserir (ArvoreB *A, TIPO chave);
 void jogaPraDireita (ArvoreB *A, TIPO chave, int indice);
 void moveNoMaiores (ArvoreB *O, ArvoreB* D, TIPO chave);
+int retornaIndice (ArvoreB *A, TIPO chave);
 
 ArvoreB* remover (ArvoreB *A, TIPO chave);
-
-
-
-
-/*
-typedef struct _local {
-  int nivel;
-  int no;
-  int indice;
-  int found;
-  TIPO chave;
-}Local;
-
-Local* iniciaBusca (ArvoreB *A, TIPO chave);
-void destroiLocal (Local *L);
-Local* buscar (ArvoreB *A, Local *L);
-*/
 
 #endif   /* ___ARVOREB_H_ */
