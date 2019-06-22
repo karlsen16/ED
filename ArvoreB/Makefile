@@ -11,7 +11,8 @@ LIBS		= -lab -lm -L $(LIB)
 all: libab app
 
 libab: \
-	$(OBJ)/arvoreb.o
+	$(OBJ)/arvoreb.o \
+	$(OBJ)/exercicios.o
 	ar -rcs $(LIB)/libab.a $(OBJ)/*.o
 
 app: $(BIN)/main
