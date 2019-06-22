@@ -27,11 +27,7 @@ ArvoreB* inicialCormen() {
   return A;
 }
 
-void exercicioCormen (ArvoreB *A) {
-  imprimir(A, 0);
-}
-
-void exercicio1 () {
+ArvoreB* inicialEu() {
   ArvoreB *A = constroiArvoreBVazia();
   A = inserir(A, 'D');
   A = inserir(A, 'H');
@@ -48,6 +44,69 @@ void exercicio1 () {
   A = inserir(A, 'M');
   A = inserir(A, 'N');
   A = inserir(A, 'O');
+  return A;
+}
+
+ArvoreB* inicialLista2() {
+  ArvoreB *A = constroiArvoreBVazia();
+  A = inserir(A, 91);
+  A = inserir(A, 90);
+  A = inserir(A, 80);
+  A = inserir(A, 71);
+  A = inserir(A, 72);
+  A = inserir(A, 50);
+  A = inserir(A, 45);
+  A = inserir(A, 47);
+  A = inserir(A, 10);
+  A = inserir(A, 8);
+  A = inserir(A, 7);
+  A = inserir(A, 5);
+  A = inserir(A, 2);
+  A = inserir(A, 3);
+  A = inserir(A, 22);
+  A = inserir(A, 44);
+  A = inserir(A, 55);
+  A = inserir(A, 66);
+  A = inserir(A, 68);
+  A = inserir(A, 17);
+  A = inserir(A, 6);
+  A = inserir(A, 21);
+  A = inserir(A, 67);
+  return A;
+}
+
+ArvoreB* inicialMago() {
+  ArvoreB *A = constroiArvoreBVazia();
+  A = inserir(A, 47);
+  A = inserir(A, 57);
+  A = inserir(A, 73);
+  A = inserir(A, 74);
+  A = inserir(A, 77);
+  A = inserir(A, 78);
+  A = inserir(A, 94);
+  A = inserir(A, 22);
+  A = inserir(A, 19);
+  A = inserir(A, 8);
+  A = inserir(A, 37);
+  A = inserir(A, 7);
+  A = inserir(A, 2);
+  A = inserir(A, 5);
+  A = inserir(A, 6);
+  return A;
+}
+
+void exercicio1 (ArvoreB *A) {
   imprimir(A, 0);
-  destroiArvoreB(A);
+}
+
+void exercicio2 (ArvoreB *A) {
+  imprimir(A, 0);
+  A = remover(A, 'N');
+  printf("\n");
+  imprimir(A, 0);
+}
+
+void exercicio3 (ArvoreB *A) {
+  imprimir(A, 0);
+  printf("\nEncontrou o 'N'? %d.\n\n", buscar(A, 'N'));
 }

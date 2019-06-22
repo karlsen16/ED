@@ -3,7 +3,11 @@
 #include "arvoreb.h"
 
 ArvoreB* inicialCormen();
-void exercicioCormen (ArvoreB *A);
-void exercicio1 ();
+ArvoreB* inicialEu();
+ArvoreB* inicialLista2();
+ArvoreB* inicialMago();
+void exercicio1 (ArvoreB *A);
+void exercicio2 (ArvoreB *A);
+void exercicio3 (ArvoreB *A);
 
 #endif /*___EXERCICIOS_H_*/

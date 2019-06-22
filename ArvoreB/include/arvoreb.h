@@ -6,8 +6,6 @@
 
 #define TIPO char
 #define T 2
-#define FOUND 1
-#define NOT_FOUND -1
 #define TRUE 1
 #define FALSE 0
 
@@ -35,6 +33,8 @@ void ordenaVetor (ArvoreB *A, TIPO chave, int indice, ArvoreB *E, ArvoreB *D);
 int livre (ArvoreB *A, TIPO chave);
 
 
-// ArvoreB* remover (ArvoreB *A, TIPO chave);
+ArvoreB* remover (ArvoreB *A, TIPO chave);
+int pertence (ArvoreB *A, TIPO chave);
+void removeOrdenado (ArvoreB *A, TIPO chave);
 
 #endif   /* ___ARVOREB_H_ */

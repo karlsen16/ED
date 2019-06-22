@@ -45,9 +45,9 @@ int buscar (ArvoreB *A, TIPO chave) {
   while((i < (A->n-1)) && (chave > A->chaves[i]))
     i++;
   if(chave == A->chaves[i])
-    return FOUND;
+    return TRUE;
   else if(A->folha)
-    return NOT_FOUND;
+    return FALSE;
   else if(chave < A->chaves[i])
     return buscar(A->filhos[i], chave);
   else
@@ -163,7 +163,8 @@ void constroiVetores (ArvoreB *O, ArvoreB *E, ArvoreB *D) {
 /*de uma única chave e seus filhos do nó origem (O)*/
 /*para o nó destino (D)*/
 void copiar (ArvoreB *O, int indiceO, ArvoreB *D, int indiceD) {
-  D->filhos[indiceD] = O->filhos[indiceO];
+  if(indiceO == 0 || indiceD == 0)
+    D->filhos[indiceD] = O->filhos[indiceO];
   D->filhos[indiceD+1] = O->filhos[indiceO+1];
   D->chaves[indiceD] = O->chaves[indiceO];
 }
@@ -219,7 +220,36 @@ int livre (ArvoreB *A, TIPO chave) {
     }
   }
 }
-/*
-ArvoreB* remover (ArvoreB *A, TIPO chave) {
 
-}*/
+ArvoreB* remover (ArvoreB *A, TIPO chave) {
+  if(pertence(A, chave)) {
+    if(A->folha && (A->n>(T-1)))
+      removeOrdenado(A, chave);
+  }
+  else {
+    int indice = retornaIndice(A, chave);
+    A->filhos[indice] = remover(A->filhos[indice], chave);
+  }
+  return A;
+}
+
+int pertence (ArvoreB *A, TIPO chave) {
+  int i = 0;
+  while((i < (A->n-1)) && (chave > A->chaves[i]))
+    i++;
+  if(chave == A->chaves[i])
+    return TRUE;
+  else
+    return FALSE;
+}
+
+void removeOrdenado (ArvoreB *A, TIPO chave) {
+  int i, aux = 0;
+  for(i = 0; i < (A->n-1); i++) {
+    if(A->chaves[i] == chave)
+      aux++;
+    copiar(A, aux, A, i);
+    aux++;
+  }
+  A->n--;
+}
