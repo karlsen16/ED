@@ -39,15 +39,15 @@ void exercicio1 () {
   A = inserir(A, 'A');
   A = inserir(A, 'B');
   A = inserir(A, 'C');
-  // A = inserir(A, 'E');
-  // A = inserir(A, 'F');
-  // A = inserir(A, 'G');
-  // A = inserir(A, 'I');
-  // A = inserir(A, 'J');
-  // A = inserir(A, 'K');
-  // A = inserir(A, 'M');
-  // A = inserir(A, 'N');
-  // A = inserir(A, 'O');
+  A = inserir(A, 'E');
+  A = inserir(A, 'F');
+  A = inserir(A, 'G');
+  A = inserir(A, 'I');
+  A = inserir(A, 'J');
+  A = inserir(A, 'K');
+  A = inserir(A, 'M');
+  A = inserir(A, 'N');
+  A = inserir(A, 'O');
   imprimir(A, 0);
   destroiArvoreB(A);
 }
