@@ -29,21 +29,11 @@ ArvoreB* inicialCormen() {
 
 ArvoreB* inicialEu() {
   ArvoreB *A = constroiArvoreBVazia();
-  A = inserir(A, 'D');
-  A = inserir(A, 'H');
-  A = inserir(A, 'L');
   A = inserir(A, 'A');
+  A = inserir(A, 'D');
+  A = inserir(A, 'E');
   A = inserir(A, 'B');
   A = inserir(A, 'C');
-  A = inserir(A, 'E');
-  A = inserir(A, 'F');
-  A = inserir(A, 'G');
-  A = inserir(A, 'I');
-  A = inserir(A, 'J');
-  A = inserir(A, 'K');
-  A = inserir(A, 'M');
-  A = inserir(A, 'N');
-  A = inserir(A, 'O');
   return A;
 }
 
@@ -101,7 +91,12 @@ void exercicio1 (ArvoreB *A) {
 
 void exercicio2 (ArvoreB *A) {
   imprimir(A, 0);
-  A = remover(A, 'N');
+  A = remover(A, 'D');
+  A = remover(A, 'E');
+  A = remover(A, 'B');
+  // A = remover(A, 'S');
+  // A = remover(A, 'Y');
+  // A = remover(A, 'Z');
   printf("\n");
   imprimir(A, 0);
 }

@@ -19,6 +19,7 @@ typedef struct _arvoreB {
 
 ArvoreB* constroiArvoreBVazia ();
 int vazia (ArvoreB *A);
+int elegivel (ArvoreB *A);
 int cheia (ArvoreB *A);
 void destroiArvoreB (ArvoreB *A);
 ArvoreB* constroiNo ();
@@ -29,12 +30,14 @@ ArvoreB* distribuir (ArvoreB *P, ArvoreB *F, TIPO chave);
 void constroiVetores (ArvoreB *O, ArvoreB *E, ArvoreB *D);
 void copiar (ArvoreB *O, int indiceO, ArvoreB *D, int indiceD);
 int retornaIndice (ArvoreB *A, TIPO chave);
-void ordenaVetor (ArvoreB *A, TIPO chave, int indice, ArvoreB *E, ArvoreB *D);
+void ordenaVetor (ArvoreB *A, TIPO chave, ArvoreB *E, ArvoreB *D);
 int livre (ArvoreB *A, TIPO chave);
-
-
 ArvoreB* remover (ArvoreB *A, TIPO chave);
 int pertence (ArvoreB *A, TIPO chave);
 void removeOrdenado (ArvoreB *A, TIPO chave);
+ArvoreB* herdeiroEsquerda (ArvoreB *A, int indice);
+ArvoreB* herdeiroDireita (ArvoreB *A, int indice);
+void elevar (ArvoreB *P, ArvoreB *F, int indice, int promovido);
+ArvoreB* mesclar (ArvoreB *E, ArvoreB *D);
 
 #endif   /* ___ARVOREB_H_ */

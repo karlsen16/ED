@@ -9,6 +9,10 @@ int vazia (ArvoreB *A) {
   return(A == NULL);
 }
 
+int elegivel (ArvoreB *A) {
+  return(A->n > T-1);
+}
+
 int cheia (ArvoreB *A) {
   return(A->n == 2*T-1);
 }
@@ -29,15 +33,17 @@ ArvoreB* constroiNo () {
 }
 
 void imprimir (ArvoreB *A, int nivel) {
-  int i;
-  for(i = 0; i < nivel; i++) { printf("  "); }
-  printf("|");
-  for(i = 0; i < A->n; i++)
-    printf("%c|", A->chaves[i]);
-  printf("\n");
-  for(i = 0; i <= A->n; i++)
-    if(A->folha == FALSE)
-      imprimir(A->filhos[i], nivel+1);
+  if(!vazia(A)) {
+    int i;
+    for(i = 0; i < nivel; i++) { printf("  "); }
+    printf("|");
+    for(i = 0; i < A->n; i++)
+      printf("%c|", A->chaves[i]);
+    printf("\n");
+    for(i = 0; i <= A->n; i++)
+      if(A->folha == FALSE)
+        imprimir(A->filhos[i], nivel+1);
+  }
 }
 
 int buscar (ArvoreB *A, TIPO chave) {
@@ -72,7 +78,7 @@ ArvoreB *inserir (ArvoreB *A, TIPO chave) {
       /*A raiz é o único nó da árvore B e ainda tem espaço*/
       /*A chave é apenas inserida na raiz*/
       if(A->folha && !cheia(A))
-        ordenaVetor(A, chave, retornaIndice(A, chave), NULL, NULL);
+        ordenaVetor(A, chave, NULL, NULL);
       /*A função livre indica que a raiz vai sofrer modificações*/
       /*livre == TRUE indica que o nó está livre de modificações*/
       else if(!livre(A, chave)) {
@@ -121,7 +127,7 @@ ArvoreB *inserir (ArvoreB *A, TIPO chave) {
     /*se chegar até aqui é porque o espaço para a chave*/
     /*já foi providenciado*/
     else
-      ordenaVetor(A, chave, retornaIndice(A, chave), NULL, NULL);
+      ordenaVetor(A, chave, NULL, NULL);
   }
   return A;
 }
@@ -132,11 +138,11 @@ ArvoreB *inserir (ArvoreB *A, TIPO chave) {
 /*para o nó pai (P) e retorna o nó adequado para continuar*/
 /*a inserção da nova chave (chave)*/
 ArvoreB* distribuir (ArvoreB *P, ArvoreB *F, TIPO chave) {
-  TIPO promovido = F->chaves[T-1];
   ArvoreB *E = constroiNo();
   ArvoreB *D = constroiNo();
   constroiVetores(F, E, D);
-  ordenaVetor(P, promovido, retornaIndice(P, promovido), E, D);
+  TIPO promovido = F->chaves[T-1];
+  ordenaVetor(P, promovido, E, D);
   P->folha = FALSE;
   if(chave < promovido)
     return E;
@@ -149,14 +155,14 @@ ArvoreB* distribuir (ArvoreB *P, ArvoreB *F, TIPO chave) {
 /*esquerda (E) e direita (D)*/
 void constroiVetores (ArvoreB *O, ArvoreB *E, ArvoreB *D) {
   int i;
+  E->folha = D->folha = O->folha;
+  E->raiz = D->raiz = FALSE;
+  E->n = D->n = T-1;
   for(i = 0; i < T-1; i++)
     copiar(O, i, E, i);
   i++;
   for(; i < 2*T-1; i++)
     copiar(O, i, D, i-T);
-  E->folha = D->folha = O->folha;
-  E->raiz = D->raiz = FALSE;
-  E->n = D->n = T-1;
 }
 
 /*Função auxiliar da constroiVetores, faz a cópia*/
@@ -178,7 +184,7 @@ int retornaIndice (ArvoreB *A, TIPO chave) {
   else {
     int i = 0;
     while(i < A->n) {
-      if(A->chaves[i] > chave)
+      if(A->chaves[i] >= chave)
         return i;
       i++;
     }
@@ -188,8 +194,8 @@ int retornaIndice (ArvoreB *A, TIPO chave) {
 
 /*Insere uma chave nova em um nó (A) não cheio*/
 /*e faz a reordenação das chaves e filhos*/
-void ordenaVetor (ArvoreB *A, TIPO chave, int indice, ArvoreB *E, ArvoreB *D) {
-  int i;
+void ordenaVetor (ArvoreB *A, TIPO chave, ArvoreB *E, ArvoreB *D) {
+  int i, indice = retornaIndice(A, chave);
   for(i = A->n; i > indice; i--) {
     A->chaves[i] = A->chaves[i-1];
     A->filhos[i+1] = A->filhos[i];
@@ -222,13 +228,61 @@ int livre (ArvoreB *A, TIPO chave) {
 }
 
 ArvoreB* remover (ArvoreB *A, TIPO chave) {
-  if(pertence(A, chave)) {
-    if(A->folha && (A->n>(T-1)))
-      removeOrdenado(A, chave);
-  }
-  else {
-    int indice = retornaIndice(A, chave);
-    A->filhos[indice] = remover(A->filhos[indice], chave);
+  if(!vazia(A)) {
+    /*caso 1*/
+    if(A->folha) {
+      if(pertence(A, chave))
+        removeOrdenado(A, chave);
+    }
+    else {
+      int indice = retornaIndice(A, chave);
+      ArvoreB *tmp;
+      /*casos 2*/
+      if(pertence(A, chave)) {
+        /*caso 2a*/
+        tmp = herdeiroEsquerda(A, indice);
+        if(elegivel(tmp)) {
+          elevar(A, tmp, indice, tmp->n-1);
+        }
+        else {
+          /*caso 2b*/
+          tmp = herdeiroDireita(A, indice);
+          if(elegivel(tmp)) {
+            elevar(A, tmp, indice, 0);
+          }
+          /*caso 2c*/
+          else {
+            /*Caso 2c simples em que a chave a ser removida*/
+            /*está em nó pai de folha*/
+            if(A->filhos[indice]->folha) {
+              ArvoreB *mesclado = mesclar(A->filhos[indice], A->filhos[indice+1]);
+              if(indice == 0)
+                A->filhos[indice+1] = mesclado;
+              else
+                A->filhos[indice] = mesclado;
+              removeOrdenado(A, chave);
+            }
+            else {
+              /*outros casos 2c*/
+            }
+          }
+        }
+      }
+      /*Temporário, por enquanto ele só continua descendo na árvore */
+      else {A->filhos[indice] = remover(A->filhos[indice], chave);}
+
+      /*casos 3*/
+      //else {
+        /*caso 3a*/
+        //if() {
+
+        //}
+        /*caso 3b*/
+        //else {
+
+        //}
+      //}
+    }
   }
   return A;
 }
@@ -244,12 +298,59 @@ int pertence (ArvoreB *A, TIPO chave) {
 }
 
 void removeOrdenado (ArvoreB *A, TIPO chave) {
-  int i, aux = 0;
-  for(i = 0; i < (A->n-1); i++) {
-    if(A->chaves[i] == chave)
-      aux++;
-    copiar(A, aux, A, i);
-    aux++;
+  int i, flag = 0;
+  ArvoreB *hold = NULL;
+  for(i = 0; i < A->n-1; i++) {
+    if(A->chaves[i] == chave) {
+      flag = 1;
+      if(i == 0)
+        hold = A->filhos[0];
+      else
+        hold = A->filhos[i+1];
+    }
+    if(flag == 1)
+      copiar(A, i+1, A, i);
   }
+  if(!vazia(hold))
+    A->filhos[i+1] = hold;
   A->n--;
+}
+
+ArvoreB* herdeiroEsquerda (ArvoreB *A, int indice) {
+  ArvoreB *tmp = A->filhos[indice];
+  while(!tmp->folha)
+    tmp = tmp->filhos[tmp->n];
+  return tmp;
+}
+
+ArvoreB* herdeiroDireita (ArvoreB *A, int indice) {
+  ArvoreB *tmp = A->filhos[indice+1];
+  while(!tmp->folha)
+    tmp = tmp->filhos[0];
+  return tmp;
+}
+
+void elevar (ArvoreB *P, ArvoreB *F, int indice, int promovido) {
+  P->chaves[indice] = F->chaves[promovido];
+  if(promovido > 0)
+    P->filhos[indice] = remover(P->filhos[indice], F->chaves[promovido]);
+  else
+    P->filhos[indice+1] = remover(P->filhos[indice+1], F->chaves[promovido]);
+}
+
+ArvoreB* mesclar (ArvoreB *E, ArvoreB *D) {
+  int i;
+  ArvoreB *tmp = constroiNo(), *hold;
+  tmp->folha = E->folha;
+  tmp->raiz = FALSE;
+  tmp->n = E->n+D->n;
+  for(i = 0; i < E->n; i++)
+    copiar(E, i, tmp, i);
+  hold = tmp->filhos[i];
+  for(; i < E->n+D->n; i++)
+    copiar(D, i-E->n, tmp, i);
+  if(!tmp->folha) {
+    tmp->filhos[E->n] = mesclar(hold, D->filhos[0]);
+  }
+  return tmp;
 }
