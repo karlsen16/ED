@@ -7,8 +7,8 @@ int main () {
   ArvoreB *C = inicialLista2();
   ArvoreB *D = inicialMago();
 
-  // exercicio1(A);
-  exercicio2(A);
+  exercicio1(A);
+  // exercicio2(A);
   // exercicio3(A);
 
   destroiArvoreB(A);

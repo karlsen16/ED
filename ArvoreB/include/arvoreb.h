@@ -39,5 +39,6 @@ ArvoreB* herdeiroEsquerda (ArvoreB *A, int indice);
 ArvoreB* herdeiroDireita (ArvoreB *A, int indice);
 void elevar (ArvoreB *P, ArvoreB *F, int indice, int promovido);
 ArvoreB* mesclar (ArvoreB *E, ArvoreB *D);
+int verificaVizinhos (ArvoreB *A, int indice);
 
 #endif   /* ___ARVOREB_H_ */

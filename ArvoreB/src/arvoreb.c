@@ -253,8 +253,8 @@ ArvoreB* remover (ArvoreB *A, TIPO chave) {
           /*caso 2c*/
           else {
             /*Caso 2c simples em que a chave a ser removida*/
-            /*está em nó pai de folha*/
-            if(A->filhos[indice]->folha) {
+            /*está em nó pai de folha com pelo menos 2 chaves*/
+            if(A->filhos[indice]->folha && A->n > 1) {
               ArvoreB *mesclado = mesclar(A->filhos[indice], A->filhos[indice+1]);
               if(indice == 0)
                 A->filhos[indice+1] = mesclado;
@@ -268,20 +268,61 @@ ArvoreB* remover (ArvoreB *A, TIPO chave) {
           }
         }
       }
-      /*Temporário, por enquanto ele só continua descendo na árvore */
-      else {A->filhos[indice] = remover(A->filhos[indice], chave);}
-
-      /*casos 3*/
-      //else {
-        /*caso 3a*/
-        //if() {
-
-        //}
-        /*caso 3b*/
-        //else {
-
-        //}
-      //}
+      /*Verifica o nó filho*/
+      else {
+        /*casos 3*/
+        if(A->filhos[indice]->folha &&
+          pertence(A->filhos[indice], chave) &&
+          !elegivel(A->filhos[indice])) {
+          /*caso 3a*/
+          int vizinho = verificaVizinhos(A, indice);
+          if(vizinho != -1) {
+            TIPO promovido;
+            A->filhos[indice] = remover(A->filhos[indice], chave);
+            if(vizinho > indice) {
+              promovido = A->filhos[vizinho]->chaves[0];
+              A->filhos[indice] = inserir(A->filhos[indice], A->chaves[indice]);
+              A->chaves[indice] = promovido;
+            }
+            else {
+              promovido = A->filhos[vizinho]->chaves[A->filhos[vizinho]->n-1];
+              A->filhos[indice] = inserir(A->filhos[indice], A->chaves[indice-1]);
+              A->chaves[indice-1] = promovido;
+            }
+            removeOrdenado(A->filhos[vizinho], promovido);
+          }
+          /*caso 3b simples*/
+          else if(elegivel(A)) {
+            int i;
+            removeOrdenado(A->filhos[indice], chave);
+            if(indice == 0) {
+              A->filhos[1] = inserir(A->filhos[1], A->chaves[0]);
+              for(i = 0; i < A->filhos[indice]->n; i++)
+                A->filhos[1] = inserir(A->filhos[1], A->filhos[0]->chaves[i]);
+              removeOrdenado(A, A->chaves[0]);
+            }
+            else if(indice == 1) {
+              A->filhos[1] = inserir(A->filhos[1], A->chaves[0]);
+              for(i = 0; i < A->filhos[0]->n; i++)
+                A->filhos[1] = inserir(A->filhos[1], A->filhos[0]->chaves[i]);
+              removeOrdenado(A, A->chaves[0]);
+            }
+            else {
+              A->filhos[indice-1] = inserir(A->filhos[indice-1], A->chaves[indice-1]);
+              for(i = 0; i < A->filhos[indice]->n; i++)
+                A->filhos[indice-1] = inserir(A->filhos[indice-1], A->filhos[indice]->chaves[i]);
+              removeOrdenado(A, A->chaves[indice-1]);
+            }
+          }
+          else {
+            /*outros casos 3b*/
+          }
+        }
+        /*Continua o caminho pela árvore*/
+        else {
+          A->filhos[indice] = remover(A->filhos[indice], chave);
+        }
+      }
     }
   }
   return A;
@@ -353,4 +394,13 @@ ArvoreB* mesclar (ArvoreB *E, ArvoreB *D) {
     tmp->filhos[E->n] = mesclar(hold, D->filhos[0]);
   }
   return tmp;
+}
+
+int verificaVizinhos (ArvoreB *A, int indice) {
+  if(indice != 0 && elegivel(A->filhos[indice-1]))
+    return indice-1;
+  else if(indice != A->n && elegivel(A->filhos[indice+1]))
+    return indice+1;
+  else
+    return -1;
 }
