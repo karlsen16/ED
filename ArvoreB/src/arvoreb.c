@@ -61,6 +61,7 @@ int buscar (ArvoreB *A, TIPO chave) {
 }
 
 /*Função de Inserção com estratégia cima para baixo*/
+/*A ideia é arrumar a árvore antes de inserir a chave nova*/
 ArvoreB *inserir (ArvoreB *A, TIPO chave) {
   /*Constrói o primeiro nó de uma árvore B vazia*/
   if(vazia(A)) {
@@ -81,6 +82,7 @@ ArvoreB *inserir (ArvoreB *A, TIPO chave) {
         ordenaVetor(A, chave, NULL, NULL);
       /*A função livre indica que a raiz vai sofrer modificações*/
       /*livre == TRUE indica que o nó está livre de modificações*/
+      /*só entra aqui se precisar modificar*/
       else if(!livre(A, chave)) {
         /*A raiz está cheia, é criada uma nova raiz acima dela*/
         if(cheia(A)) {
@@ -169,15 +171,22 @@ void constroiVetores (ArvoreB *O, ArvoreB *E, ArvoreB *D) {
 /*de uma única chave e seus filhos do nó origem (O)*/
 /*para o nó destino (D)*/
 void copiar (ArvoreB *O, int indiceO, ArvoreB *D, int indiceD) {
+  /*Só copia o ponteiro do filho esquerdo se for*/
+  /*a primeira chave do vetor*/
   if(indiceO == 0 || indiceD == 0)
     D->filhos[indiceD] = O->filhos[indiceO];
+  /*Mas sempre copia a chave e o ponteiro do filho*/
+  /*da direita*/
   D->filhos[indiceD+1] = O->filhos[indiceO+1];
   D->chaves[indiceD] = O->chaves[indiceO];
 }
 
 /*Retorna a posição em que a chave ficaria no vetor*/
+/*caso ela tenha que ser inserida no nó recebido (A)*/
 /*também serve para determinar o nó filho onde a*/
-/*chave deve ser inserida*/
+/*chave deve ser inserida, determinando o caminho*/
+/*para os casos em que a chave será inserida em*/
+/*um dos filhos de A*/
 int retornaIndice (ArvoreB *A, TIPO chave) {
   if(vazia(A))
     return 0;
@@ -226,10 +235,13 @@ int livre (ArvoreB *A, TIPO chave) {
     }
   }
 }
-
+/*Função de Remoção com os casos 1, 2a, 2b e 3a completos*/
+/*Também cobre alguns casos triviais 2c e 3b*/
 ArvoreB* remover (ArvoreB *A, TIPO chave) {
   if(!vazia(A)) {
     /*caso 1*/
+    /*Remoção de uma chave em um nó folha*/
+    /*com T ou mais chaves. Apenas remove a chave*/
     if(A->folha) {
       if(pertence(A, chave))
         removeOrdenado(A, chave);
@@ -238,23 +250,30 @@ ArvoreB* remover (ArvoreB *A, TIPO chave) {
       int indice = retornaIndice(A, chave);
       ArvoreB *tmp;
       /*casos 2*/
+      /*Remoção de uma chave em nó interno*/
       if(pertence(A, chave)) {
         /*caso 2a*/
+        /*Verifica se a maior chave a esquerda pode ser*/
+        /*removida e substituir a chave que queremos remover*/
         tmp = herdeiroEsquerda(A, indice);
         if(elegivel(tmp)) {
           elevar(A, tmp, indice, tmp->n-1);
         }
         else {
           /*caso 2b*/
+          /*Semelhante ao caso anterior, mas agora com a menor*/
+          /*chave a direita*/
           tmp = herdeiroDireita(A, indice);
           if(elegivel(tmp)) {
             elevar(A, tmp, indice, 0);
           }
           /*caso 2c*/
+          /*Não existe possíveis herdeiros, será necessário*/
+          /*mesclar dois nós filhos e então remover a chave*/
           else {
             /*Caso 2c simples em que a chave a ser removida*/
-            /*está em nó pai de folha com pelo menos 2 chaves*/
-            if(A->filhos[indice]->folha && A->n > 1) {
+            /*está em nó pai de folha com pelo menos T chaves*/
+            if(A->filhos[indice]->folha && A->n > T-1) {
               ArvoreB *mesclado = mesclar(A->filhos[indice], A->filhos[indice+1]);
               if(indice == 0)
                 A->filhos[indice+1] = mesclado;
@@ -264,18 +283,30 @@ ArvoreB* remover (ArvoreB *A, TIPO chave) {
             }
             else {
               /*outros casos 2c*/
+              /*Aqui entrariam mais dois casos 2c:*/
+              /*a) nó da chave a ser removida tem T-1 chaves*/
+              /*b)     "  "        " "     é pai de um nó interno*/
             }
           }
         }
       }
-      /*Verifica o nó filho*/
+      /*A chave a ser removida não está em um nó interno*/
       else {
         /*casos 3*/
+        /*Verifica o nó filho para saber se*/
+        /*modificações são necessárias*/
         if(A->filhos[indice]->folha &&
           pertence(A->filhos[indice], chave) &&
           !elegivel(A->filhos[indice])) {
           /*caso 3a*/
+          /*Um nó vizinho a esquerda ou a direita pode*/
+          /*promover uma de suas chaves para o pai e*/
+          /*o pai rebaixa uma das suas para o nó folha*/
+          /*com a chave a ser removida*/
           int vizinho = verificaVizinhos(A, indice);
+          /*A função verificaVizinhos retorna o indice do*/
+          /*nó filho que tem T ou mais chaves ou -1 se*/
+          /*nenhum for elegível*/
           if(vizinho != -1) {
             TIPO promovido;
             A->filhos[indice] = remover(A->filhos[indice], chave);
@@ -292,16 +323,12 @@ ArvoreB* remover (ArvoreB *A, TIPO chave) {
             removeOrdenado(A->filhos[vizinho], promovido);
           }
           /*caso 3b simples*/
+          /*Nenhum dos vizinhos podia emprestar uma de suas chaves*/
+          /*então os dois vão ser unidos e a chave poderá ser removida*/
           else if(elegivel(A)) {
             int i;
             removeOrdenado(A->filhos[indice], chave);
-            if(indice == 0) {
-              A->filhos[1] = inserir(A->filhos[1], A->chaves[0]);
-              for(i = 0; i < A->filhos[indice]->n; i++)
-                A->filhos[1] = inserir(A->filhos[1], A->filhos[0]->chaves[i]);
-              removeOrdenado(A, A->chaves[0]);
-            }
-            else if(indice == 1) {
+            if(indice == 0 || indice == 1) {
               A->filhos[1] = inserir(A->filhos[1], A->chaves[0]);
               for(i = 0; i < A->filhos[0]->n; i++)
                 A->filhos[1] = inserir(A->filhos[1], A->filhos[0]->chaves[i]);
@@ -316,6 +343,9 @@ ArvoreB* remover (ArvoreB *A, TIPO chave) {
           }
           else {
             /*outros casos 3b*/
+            /*Aqui entraria o caso 3b em que o nó pai*/
+            /*da folha com a chave a ser removida*/
+            /*possui T-1 chaves*/
           }
         }
         /*Continua o caminho pela árvore*/
@@ -328,6 +358,7 @@ ArvoreB* remover (ArvoreB *A, TIPO chave) {
   return A;
 }
 
+/*Verifica se a chave procurada pertence ao nó (A)*/
 int pertence (ArvoreB *A, TIPO chave) {
   int i = 0;
   while((i < (A->n-1)) && (chave > A->chaves[i]))
@@ -338,6 +369,7 @@ int pertence (ArvoreB *A, TIPO chave) {
     return FALSE;
 }
 
+/*Remove uma chave do nó (A) sem verificar violações*/
 void removeOrdenado (ArvoreB *A, TIPO chave) {
   int i, flag = 0;
   ArvoreB *hold = NULL;
@@ -357,6 +389,7 @@ void removeOrdenado (ArvoreB *A, TIPO chave) {
   A->n--;
 }
 
+/*Função auxiliar para o caso 2a*/
 ArvoreB* herdeiroEsquerda (ArvoreB *A, int indice) {
   ArvoreB *tmp = A->filhos[indice];
   while(!tmp->folha)
@@ -364,6 +397,7 @@ ArvoreB* herdeiroEsquerda (ArvoreB *A, int indice) {
   return tmp;
 }
 
+/*Função auxiliar para o caso 2b*/
 ArvoreB* herdeiroDireita (ArvoreB *A, int indice) {
   ArvoreB *tmp = A->filhos[indice+1];
   while(!tmp->folha)
@@ -371,6 +405,9 @@ ArvoreB* herdeiroDireita (ArvoreB *A, int indice) {
   return tmp;
 }
 
+/*Eleva o herdeiro dos casos 2a e 2b até a*/
+/*posição da chave a ser removida. Subsituindo*/
+/*a chave e então remove o herdeiro da folha*/
 void elevar (ArvoreB *P, ArvoreB *F, int indice, int promovido) {
   P->chaves[indice] = F->chaves[promovido];
   if(promovido > 0)
@@ -379,6 +416,7 @@ void elevar (ArvoreB *P, ArvoreB *F, int indice, int promovido) {
     P->filhos[indice+1] = remover(P->filhos[indice+1], F->chaves[promovido]);
 }
 
+/*Mescla dois nós em um só*/
 ArvoreB* mesclar (ArvoreB *E, ArvoreB *D) {
   int i;
   ArvoreB *tmp = constroiNo(), *hold;
@@ -390,12 +428,13 @@ ArvoreB* mesclar (ArvoreB *E, ArvoreB *D) {
   hold = tmp->filhos[i];
   for(; i < E->n+D->n; i++)
     copiar(D, i-E->n, tmp, i);
-  if(!tmp->folha) {
+  if(!tmp->folha)
     tmp->filhos[E->n] = mesclar(hold, D->filhos[0]);
-  }
   return tmp;
 }
 
+/*Verifica os vizinhos e retorna o indice de qual*/
+/*estiver elegivel. Ou -1 se não encontrar*/
 int verificaVizinhos (ArvoreB *A, int indice) {
   if(indice != 0 && elegivel(A->filhos[indice-1]))
     return indice-1;
