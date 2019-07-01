@@ -1,11 +1,11 @@
 
 APPS 			= ./apps
 BIN 			= ./bin
-INCLUDE 	= ./include
+INCLUDE 		= ./include
 LIB 			= ./lib
 OBJ 			= ./obj
 SRC 			= ./src
-FLAGS 		= -Wall -std=gnu99
+FLAGS 			= -Wall -std=gnu99
 LIBS			= -lgrf -L $(LIB)
 
 all: libgrf app
@@ -13,8 +13,7 @@ all: libgrf app
 new: clean all run
 
 libgrf: \
-	$(OBJ)/grafos.o \
-	$(OBJ)/exercicios.o
+	$(OBJ)/grafos.o
 	ar -rcs $(LIB)/libgrf.a $(OBJ)/*.o
 
 app: $(BIN)/main
