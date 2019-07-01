@@ -1,14 +1,16 @@
 
-APPS 		= ./apps
-BIN 		= ./bin
+APPS 			= ./apps
+BIN 			= ./bin
 INCLUDE		= ./include
-LIB 		= ./lib
-OBJ 		= ./obj
-SRC 		= ./src
+LIB 			= ./lib
+OBJ 			= ./obj
+SRC 			= ./src
 FLAGS 		= -Wall -std=gnu99
-LIBS		= -lab -lm -L $(LIB)
+LIBS			= -lab -lm -L $(LIB)
 
 all: libab app
+
+new: clean all run
 
 libab: \
 	$(OBJ)/arvoreb.o \

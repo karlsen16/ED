@@ -31,6 +31,7 @@ void adicionaArestaGrafoA (int u, int v, GrafoA *G) {
   NoA *novo = (NoA*)malloc(sizeof(NoA));
   novo->id = v;
   novo->next = NULL;
+  novo->visivel = TRUE;
   if(ultimo != NULL)
     ultimo->next = novo;
   else
@@ -47,7 +48,8 @@ void imprimeGrafoAdj (GrafoA *G) {
       printf("%2d (g:%2d) (c:%2d) (s:%2d) -> ", i, G->grau[i], G->cor[i], G->sat[i]);
       NoA *v;
       for(v = G->Adj[i]; v != NULL; v = v->next)
-        printf("%2d ", v->id);
+        if(v->visivel)
+          printf("%2d ", v->id);
       printf("\n");
     }
     printf("\n");
@@ -76,8 +78,27 @@ void liberaNos (NoA *N) {
   }
 }
 
+void removeNo (GrafoA *G, int indice) {
+  int v;
+  NoA *walk;
+  for(walk = G->Adj[indice]; walk != NULL; walk = walk->next)
+    walk->visivel = FALSE;
+  G->E -= G->grau[indice];
+  G->grau[indice] = 0;
+  for (v = 0; v < G->V; v++)
+    if (G->Adj[v] != NULL)
+      for(walk = G->Adj[v]; walk != NULL; walk = walk->next)
+        if(walk->id == indice) {
+          walk->visivel = FALSE;
+          G->E--;
+          if(G->grau[v])
+            G->grau[v]--;
+          break;
+        }
+}
+
 GrafoA* inicializaGrafoAdj () {
-  FILE *F = fopen("grafo08.csv", "r");
+  FILE *F = fopen("teste.csv", "r");
   GrafoA *G = criarGrafoAdj(TAM);
   int i, v, flag = 1;
   i = leValor(F, &flag);
@@ -111,16 +132,26 @@ int leValor (FILE *F, int *E) {
   return i;
 }
 
-int maiorGrau (GrafoA *G) {
-  int i, maiorGrau, maiorSat, indice;
-  maiorGrau = maiorSat = indice = 0;
-  for(i = 0; i < G->V; i++)
-    if(!colorido(G, i) && G->sat[i] >= maiorSat && G->grau[i] > maiorGrau) {
-      maiorSat = G->sat[i];
-      maiorGrau = G->grau[i];
-      indice = i;
+int proximoNo (GrafoA *G, int indice) {
+  int i = -1, maiorGrau, maiorSat;
+  NoA *walk;
+  maiorGrau = maiorSat = 0;
+  for(walk = G->Adj[indice]; walk != NULL; walk = walk->next)
+    if(!colorido(G, walk->id) && G->sat[walk->id] >= maiorSat && G->grau[walk->id] >= maiorGrau) {
+      maiorSat = G->sat[walk->id];
+      maiorGrau = G->grau[walk->id];
+      i = walk->id;
     }
-  return indice;
+  if(i == -1) {
+    int j;
+    for(j = 0; j < G->V; j++)
+      if(!colorido(G, j) && G->sat[j] >= maiorSat && G->grau[j] >= maiorGrau) {
+        maiorSat = G->sat[j];
+        maiorGrau = G->grau[j];
+        i = j;
+      }
+  }
+  return i;
 }
 
 int colorido (GrafoA *G, int indice) {
@@ -130,54 +161,57 @@ int colorido (GrafoA *G, int indice) {
 void atualizaSat (int indice, GrafoA *G) {
   NoA *v;
   for(v = G->Adj[indice]; v!= NULL; v = v->next)
-    G->sat[v->id]++;
+    if(!vizinhoCor(v->id, indice, G->cor[indice], G))
+      G->sat[v->id]++;
 }
 
-void removeNo (GrafoA *G, int indice) {
-  liberaNos(G->Adj[indice]);
-  G->E -= G->grau[indice];
-  G->grau[indice] = 0;
-  G->Adj[indice] = NULL;
-  int v;
-  NoA *walk, *aux;
-  for (v = 0; v < G->V; v++) {
-    aux = NULL;
-    if (G->Adj[v] != NULL)
-      for(walk = G->Adj[v]; walk != NULL; walk = walk->next) {
-        if(walk->id == indice) {
-          if(aux == NULL)
-            G->Adj[v] = walk->next;
-          else if(walk->next == NULL)
-            aux->next = NULL;
-          else
-            aux->next = walk->next;
-          free(walk);
-          G->E--;
-          G->grau[v]--;
-          break;
-        }
-      aux = walk;
-      }
-  }
+int vizinhoCor (int indice, int i, int cor, GrafoA *G) {
+  NoA *v;
+  for(v = G->Adj[indice]; v!= NULL; v = v->next)
+    if(G->cor[v->id] == cor && v->id != i)
+      return TRUE;
+  return FALSE;
 }
 
-/*int determinaCor (GrafoA *G, int indice) {
+int determinaCor (GrafoA *G, int indice) {
   int i = 1, flag = 1;
   NoA *walk;
   while(flag == 1) {
     for(walk = G->Adj[indice]; walk != NULL; walk = walk->next) {
-      if(walk->)
+      if(G->cor[walk->id] == i)
+        break;
     }
+    if(walk == NULL)
+      flag = 0;
+    else
+      i++;
   }
-}*/
+  return i;
+}
 
 void exercicio1 (GrafoA *G) {
   imprimeGrafoAdj(G);
-  int indice = maiorGrau(G);
+  int indice = 0, i, V = 0;
+  for(i = 0; i < G->V; i++)
+    if(G->grau[i] > V) {
+      V = G->grau[i];
+      indice = i;
+    }
+  V = G->V-2;
   printf("\nNo escolhido: %d\n\n", indice);
-  //G->cor[indice] = determinaCor(G, indice);
-
-  // removeNo(G, indice);
-  // atualizaSat(indice, G);
-  // imprimeGrafoAdj(G);
+  G->cor[indice] = 1;
+  removeNo(G, indice);
+  imprimeGrafoAdj(G);
+  scanf("%d", &i);
+  while(V > 0) {
+    atualizaSat(indice, G);
+    indice = proximoNo(G, indice);
+    printf("\nNo escolhido: %d\n\n", indice);
+    G->cor[indice] = determinaCor(G, indice);
+    removeNo(G, indice);
+    imprimeGrafoAdj(G);
+    scanf("%d", &i);
+    V--;
+  }
+  imprimeGrafoAdj(G);
 }

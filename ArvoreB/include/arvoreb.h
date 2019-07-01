@@ -30,6 +30,7 @@ ArvoreB* distribuir (ArvoreB *P, ArvoreB *F, TIPO chave);
 void constroiVetores (ArvoreB *O, ArvoreB *E, ArvoreB *D);
 void copiar (ArvoreB *O, int indiceO, ArvoreB *D, int indiceD);
 int retornaIndice (ArvoreB *A, TIPO chave);
+int indicePai (ArvoreB *A, int indice);
 void ordenaVetor (ArvoreB *A, TIPO chave, ArvoreB *E, ArvoreB *D);
 int livre (ArvoreB *A, TIPO chave);
 ArvoreB* remover (ArvoreB *A, TIPO chave);
