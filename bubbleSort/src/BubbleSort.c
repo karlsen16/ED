@@ -3,7 +3,7 @@
 
 void bubbleSort (int *V, int tam) {
   int i;
-  for(i = tam-1; i > 1; i--) {
+  for(i = tam-1; i >= 1; i--) {
     int j;
     for(j = 0; j < i; j++)
       if(V[j] > V[j+1]) {
